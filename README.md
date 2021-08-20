@@ -1,3 +1,6 @@
+# 08/2021: This is the only known working fork of LE_FIND_PENDING_AUTHZ
+I made quick edits to handle new authz-v3 endpoints and also handle changes to the JSON response objects that have been made since 2017. It can be refactored better, (for example, I did a simple .replace() to quickly remove a quote on an auth key), but it gets the job done for a problem most people wont need to even solve for.
+
 # LE_FIND_PENDING_AUTHZ
 Use Certbot Logs as a way of finding pending autz
 
