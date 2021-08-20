@@ -1,23 +1,43 @@
-# 08/2021: This is the only known working fork of LE_FIND_PENDING_AUTHZ
+# This is the only known working fork of LE_FIND_PENDING_AUTHZ IN 2021
 I made quick edits to handle new authz-v3 endpoints and also handle changes to the JSON response objects that have been made since 2017. It can be refactored better, (for example, I did a simple .replace() to quickly remove a quote on an auth key), but it gets the job done for a problem most people wont need to even solve for.
 
-# LE_FIND_PENDING_AUTHZ
-Use Certbot Logs as a way of finding pending autz
+## Usage:
+The below readme is from (@sahsanu at LetsEncrypt Community Forums)[https://community.letsencrypt.org/t/too-many-requests-of-a-given-type-how-do-you-reset-this/44182/2]
+```
+cd /var/log/letsencrypt/
+wget https://raw.githubusercontent.com/ahaw021/LE_FIND_PENDING_AUTHZ/master/LE_FIND_PENDING_AUTHZ.py
+Edit python script LE_FIND_PENDING_AUTHZ.py and modify these 2 variables:
+```
 
-# USAGE:
+Before:
 
-The Usage of the script should be pretty straight forward. 
+```
+PATH = r""
+KEY_FOLDER = r""
+```
 
-The Script requires two paramaters which are defined at the top
+After (you need to use the right path to your account on key_folder variable):
 
-**PATH:** the path to the log directory for Let's Encrypt - usually this is is /var/log/letsencrypt
+```
+PATH = r"/var/log/letsencrypt"
+KEY_FOLDER = r"/etc/letsencrypt/accounts/acme-v01.api.letsencrypt.org/directory/xxxxxxxxxxxxxxxxxxxxxxxxx"
+```
 
-**KEY FOLDER** - folder for Let's Encrypt Account Key. Usually /etc/letsencrypt/accounts/<random numbers and letters>
+Save the file and execute it:
 
-# TODO: 
+```
+python LE_FIND_PENDING_AUTHZ.py
+```
 
-maybe hard code the path - it seems to be consistent across most people who use the script
-figure out account ID automatically from the log files so user does not have to enter the key folder (this should be able to be deduced from the log files)
-add samples to run this as a post hook
+the script should invalidate the pending authzs (you should see something like this):
 
+```
+Reviewing Auth: 9lzHojU6yyT2vEzYuI0wnha1A3UR8eKObjiQJQdvkk0
+         Status:pending Domain: yourdomain.tld  Expires: 2017-10-16T20:34:12Z
+Invalidating :9lzHojU6yyT2vEzYuI0wnha1A3UR8eKObjiQJQdvkk0
+and if you run the script again, the previous pending authz should be invalid now:
 
+Reviewing Auth: 9lzHojU6yyT2vEzYuI0wnha1A3UR8eKObjiQJQdvkk0
+         Status:invalid Domain: yourdomain.tld  Expires: 2017-10-16T20:34:12Z
+If you have invalidated the pending authzs you should try to renew your certs again.
+```
