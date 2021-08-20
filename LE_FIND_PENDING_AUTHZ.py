@@ -19,10 +19,10 @@ KEY_FOLDER = r""
 
 #DO NOT TOUCH PARAMETERS BELOW UNLESS YOU ARE CONFIDENT OF THEIR FUNCTIONING
 
-CHALLENGES_REGEX = r'(?<=letsencrypt\.org\/acme\/authz\/).+?(?=\>|\s|\.)'
+CHALLENGES_REGEX = r'(?<=letsencrypt\.org\/acme\/authz-v3\/).+?(?=\>|\s|\.)'
 SUCCESS_REGEX = r'Congratulations! Your certificate'
 LOG_CUTOFF_DAYS = dt.date.today() - dt.timedelta(days=30)
-PRODUCTION_CA = 'https://acme-v01.api.letsencrypt.org/'
+PRODUCTION_CA = 'https://acme-v02.api.letsencrypt.org/'
 STAGING_CA = 'https://acme-staging.api.letsencrypt.org/'
 challenge_re = re.compile(CHALLENGES_REGEX)
 success_re = re.compile(SUCCESS_REGEX)
@@ -62,14 +62,14 @@ def ReviewAuthzViaHTTPS(authz):
 	for auth in authz:
 		print('Reviewing Auth: ' + auth)
 		
-		server_response = http.request('GET',PRODUCTION_CA+ 'acme/authz/' +auth)
+		server_response = http.request('GET',PRODUCTION_CA+ 'acme/authz-v3/' +auth.replace('"',''))
 		json_body = json.loads(server_response.data.decode('utf-8'))
 
 		if str(json_body['status']) == '404':
 			print('\tStatus: ' + str(json_body["status"]) + ' ' + json_body["detail"] + '\n')
 			continue
 
-		print('\t Status:' + str(json_body["status"]) +' Domain: ' + json_body["identifier"]["value"] +'  Expires: ' + str(json_body["expires"]))
+		print('\t Status:' + str(json_body["status"]) +' Domain: ' + json_body.get("identifier","Unknown") +'  Expires: ' + str(json_body.get("expires","Unknown")))
 		if(json_body["status"] == 'pending'):
 			print('Invalidating :'+auth)
 			InvalidateAuth(json_body["challenges"][0]["uri"] , json_body["challenges"][0]["token"])
